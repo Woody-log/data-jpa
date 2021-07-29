@@ -11,6 +11,8 @@ import study.datajpa.Entity.Member;
 import study.datajpa.Entity.Team;
 import study.datajpa.dto.MemberDto;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +28,9 @@ public class MemberRepositoryTest {
 
     @Autowired
     TeamRespository teamRespository;
+
+    @PersistenceContext
+    EntityManager em;
 
     @Test
     public void baiscCRUD() {
@@ -119,7 +124,7 @@ public class MemberRepositoryTest {
         //when
         Page<Member> page = memberRepository.findByAge(age, pageRequest);
 
-        Page<MemberDto> map = page.map(member -> new MemberDto(member.getId(), member.getUsername(), member.getTeam().getName()));
+        Page<MemberDto> map = page.map(MemberDto::new);
 
         for (MemberDto memberDto : map) {
             System.out.println(memberDto);
@@ -140,5 +145,98 @@ public class MemberRepositoryTest {
         assertThat(page.getTotalPages()).isEqualTo(2);
         assertThat(page.isFirst()).isTrue();
         assertThat(page.hasNext()).isTrue();
+    }
+
+    @Test
+    public void findMemberLazy() throws Exception {
+        //given
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+        teamRespository.save(teamA);
+        teamRespository.save(teamB);
+
+        Member member1 = new Member("member1", 10, teamA);
+        Member member2 = new Member("member2", 10, teamB);
+
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+
+        em.flush();
+        em.clear();
+
+        //when
+        //select Member
+        List<Member> members = memberRepository.findEntityGraphByUsername("member1");
+
+        for (Member member : members) {
+            System.out.println("member = " + member.getUsername());
+            System.out.println("member.class = " + member.getClass());
+            System.out.println("member.team = " + member.getTeam().getName());
+        }
+
+
+        //then
+
+    }
+
+    @Test
+    public void queryHint() throws Exception {
+        //given
+        Member member1 = new Member("member1", 10);
+        memberRepository.save(member1);
+        em.flush();
+        em.clear();
+
+
+        // hints 성능개선에 크게 도움안됌.. 차라리 쿼리 튜닝을 하셈..
+        //when
+        Member findMember = memberRepository.findReadOnlyByUsername("member1");
+        findMember.setUsername("member2");
+
+        // findMember.setUsername("member2");
+        em.flush();
+    }
+
+    @Test
+    public void Lock() throws Exception {
+        //given
+        Member member1 = new Member("member1", 10);
+        memberRepository.save(member1);
+        em.flush();
+        em.clear();
+
+        //when
+        List<Member> findMember = memberRepository.findLockByUsername("member1");
+
+    }
+
+    @Test
+    public void callCustom() throws Exception {
+        //given
+        List<Member> result = memberRepository.findMemberCustom();
+
+        //when
+
+        //then
+    }
+
+    @Test
+    public void JpaEventBaseEntity() throws Exception {
+        //given
+        Member member = new Member("username");
+        memberRepository.save(member);
+
+        Thread.sleep(100);
+        member.setUsername("member2");
+
+        em.flush();
+        em.clear();
+
+        //when
+        Member findMember = memberRepository.findById(member.getId()).get();
+
+        //then
+        System.out.println("member.getCreatedDate() = " + findMember.getCreatedDate());
+        System.out.println("member.getUpdatedDate() = " + findMember.getLastModifiedDate());
     }
 }

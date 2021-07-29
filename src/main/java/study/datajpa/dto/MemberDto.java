@@ -1,6 +1,7 @@
 package study.datajpa.dto;
 
 import lombok.Data;
+import study.datajpa.Entity.Member;
 
 @Data
 public class MemberDto {
@@ -9,9 +10,8 @@ public class MemberDto {
     private String username;
     private String teamName;
 
-    public MemberDto(Long id, String username, String teamName) {
-        this.id = id;
-        this.username = username;
-        this.teamName = teamName;
+    public MemberDto(Member member) {
+        this.id = member.getId();
+        this.username = member.getUsername();
     }
 }
