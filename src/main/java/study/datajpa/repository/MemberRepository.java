@@ -30,7 +30,7 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
     List<Member> findByNames(@Param("names") Collection<String> names);
 
     List<Member> findListByUsername(String username); // 리스트
-    Member findMemberByUsername(String username);   // 단건
+    List<Member> findMemberByUsername(String username);   // 단건
     Optional<Member> findOptionalByUsername(String username);   // 단건
 
     @Query(value ="select m from Member m  left join fetch m.team t", countQuery = "select count(m) from Member m")
@@ -56,4 +56,7 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
     // select for update
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     List<Member> findLockByUsername(String username);
+
+    @Query("update Member m set m.age = m.age + :i")
+    int bulkAgePlus(int i);
 }

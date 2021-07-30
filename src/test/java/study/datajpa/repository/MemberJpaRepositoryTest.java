@@ -56,4 +56,20 @@ class MemberJpaRepositoryTest {
         long deletedCount = membmerJpaRepository.count();
         assertThat(deletedCount).isEqualTo(0);
     }
+
+    @Test
+    public void bulkUpdae() throws Exception {
+        //given
+        membmerJpaRepository.save(new Member("member1", 10));
+        membmerJpaRepository.save(new Member("member1", 119));
+        membmerJpaRepository.save(new Member("member1", 20));
+        membmerJpaRepository.save(new Member("member1", 21));
+        membmerJpaRepository.save(new Member("member1", 40));
+
+        //when
+        int resultCount = membmerJpaRepository.bulkAgeUpdate(20);
+
+        //then
+        assertThat(resultCount).isEqualTo(3);
+     }
 }

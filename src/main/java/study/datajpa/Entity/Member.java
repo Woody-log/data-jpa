@@ -30,10 +30,10 @@ public class Member extends BaseEntity {
         this.age = age;
     }
 
-    public Member(String username, int age, Team team) {
-        this.username = username;
+    public Member(String name, int age, Team team) {
+        this.username = name;
         this.age = age;
-        this.team = team;
+        changeTeam(team);
     }
 
     public void changeTeam(Team team) {

@@ -85,7 +85,7 @@ public class MemberRepositoryTest {
         Optional<Member> result = memberRepository.findOptionalByUsername("AAA");
         System.out.println("result = " + result);
 
-        Member aaa = memberRepository.findMemberByUsername("aaa");
+        List<Member> aaa = memberRepository.findMemberByUsername("aaa");
         System.out.println("aaa = " + aaa);
 
         Optional<Member> aaa1 = memberRepository.findOptionalByUsername("aaa");
@@ -120,6 +120,7 @@ public class MemberRepositoryTest {
 
         int age = 10;
         PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "username"));
+        PageRequest pageRequest2 = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "age"));
 
         //when
         Page<Member> page = memberRepository.findByAge(age, pageRequest);
@@ -238,5 +239,27 @@ public class MemberRepositoryTest {
         //then
         System.out.println("member.getCreatedDate() = " + findMember.getCreatedDate());
         System.out.println("member.getUpdatedDate() = " + findMember.getLastModifiedDate());
+    }
+
+    @Test
+    public void bulkUpdae() throws Exception {
+        //given
+        memberRepository.save(new Member("member1", 10));
+        memberRepository.save(new Member("member2", 19));
+        memberRepository.save(new Member("member3", 20));
+        memberRepository.save(new Member("member4", 21));
+        memberRepository.save(new Member("member5", 40));
+
+        //when
+        int resultCount = memberRepository.bulkAgePlus(20); // 자동으로 flush됌.
+        //em.clear();
+
+        List<Member> result = memberRepository.findMemberByUsername("member5");
+        Member member5 = result.get(0);
+        System.out.println("member5" + member5);
+
+
+        //then
+        assertThat(resultCount).isEqualTo(3);
     }
 }

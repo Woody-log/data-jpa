@@ -41,7 +41,7 @@ public class MemberController {
         return map;
     }
 
-    @PostConstruct
+    //@PostConstruct
     public void init() {
         //memberRepository.save(new Member(("userA")));
 
