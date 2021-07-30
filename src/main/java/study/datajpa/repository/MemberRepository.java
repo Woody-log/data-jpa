@@ -30,10 +30,12 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
     List<Member> findByNames(@Param("names") Collection<String> names);
 
     List<Member> findListByUsername(String username); // 리스트
+
     List<Member> findMemberByUsername(String username);   // 단건
+
     Optional<Member> findOptionalByUsername(String username);   // 단건
 
-    @Query(value ="select m from Member m  left join fetch m.team t", countQuery = "select count(m) from Member m")
+    @Query(value = "select m from Member m  left join fetch m.team t", countQuery = "select count(m) from Member m")
     Page<Member> findByAge(int age, Pageable pageable);
 
     @Query("select m from Member m join fetch m.team")
@@ -50,7 +52,7 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
     @EntityGraph(attributePaths = {"team"})
     List<Member> findEntityGraphByUsername(@Param("usenName") String userName);
 
-    @QueryHints(value = @QueryHint(name="org.hibername.readOnly", value="true"))
+    @QueryHints(value = @QueryHint(name = "org.hibername.readOnly", value = "true"))
     Member findReadOnlyByUsername(String username);
 
     // select for update
@@ -59,4 +61,12 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
 
     @Query("update Member m set m.age = m.age + :i")
     int bulkAgePlus(int i);
+
+    @Query(value = "select * from member where username=?", nativeQuery = true)
+    Member findByNativeQuery(String username);
+
+    @Query(value = "select m.member_id as id, m.username, t.name as teamName from member m left join team t"
+            , countQuery = "select count(*) from member"
+            , nativeQuery = true)
+    Page<MemberProjection> findByNativeProject(Pageable pageable);
 }
